@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>세계 친구 여권 — 누구의 나라일까?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --sea: #1E5AA8;
+    --sun: #FFD23F;
+    --grass: #3BB273;
+    --coral: #EF476F;
+    --paper: #FFFDF7;
+    --ink: #1B2A41;
+    --muted: #5B6B82;
+    --line: #D9E2EE;
+    --bg: #E8F1FB;
+    --card: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1C2638; --ink: #F2F5FA; --muted: #A7B4C8; --line: #33415A;
+      --bg: #111A2A; --card: #243149; --sea: #5B9BEF;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1C2638; --ink: #F2F5FA; --muted: #A7B4C8; --line: #33415A;
+    --bg: #111A2A; --card: #243149; --sea: #5B9BEF;
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 1.05rem; line-height: 1.55;
+  }
+  .flag { font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; line-height: 1; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
+  h1, h2, .display { font-family: "Jua", "Gowun Dodum", sans-serif; font-weight: 400; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+  header h1 { margin: 0; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--sea); }
+  .progress { font-family: "Jua", sans-serif; font-size: 1.1rem; color: var(--muted); white-space: nowrap; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, label:focus-within { outline: 3px solid var(--sun); outline-offset: 3px; }
+
+  /* Passport page */
+  .passport {
+    background: var(--paper); border: 3px solid var(--sea); border-radius: 28px;
+    padding: 1.5rem 1.25rem; position: relative;
+    box-shadow: 0 8px 0 var(--sea);
+  }
+  .who { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; align-items: center; }
+  .photo {
+    width: 128px; height: 150px; border-radius: 16px; overflow: hidden;
+    background: var(--sun); display: grid; place-items: center;
+    border: 3px dashed var(--ink); position: relative;
+  }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .photo .emo { font-size: 4rem; }
+  .who h2 { margin: 0 0 .15rem; font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.15; }
+  .who .job { color: var(--muted); margin: 0 0 .5rem; }
+  .ask { font-family: "Jua", sans-serif; font-size: 1.3rem; margin: 1.4rem 0 .8rem; text-align: center; }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .choice {
+    background: var(--card); color: var(--ink); border: 3px solid var(--line); border-radius: 20px;
+    padding: .9rem .5rem; display: flex; flex-direction: column; align-items: center; gap: .35rem;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .choice .flag { font-size: 3rem; }
+  .choice .name { font-family: "Jua", sans-serif; font-size: 1.2rem; }
+  .choice:hover:not(:disabled) { border-color: var(--sea); transform: translateY(-2px); }
+  .choice.right { border-color: var(--grass); background: color-mix(in srgb, var(--grass) 18%, var(--card)); }
+  .choice.wrong { border-color: var(--coral); background: color-mix(in srgb, var(--coral) 15%, var(--card)); animation: shake .35s; }
+  .choice:disabled { cursor: default; }
+  @keyframes shake { 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  .feedback { min-height: 5.5rem; margin-top: 1rem; text-align: center; }
+  .feedback .big { font-family: "Jua", sans-serif; font-size: 1.6rem; margin: 0; }
+  .feedback .fact { margin: .25rem 0 .75rem; color: var(--muted); }
+  .next {
+    font-family: "Jua", sans-serif; font-size: 1.25rem; background: var(--sea); color: #fff;
+    border: 0; border-radius: 999px; padding: .7rem 2rem; box-shadow: 0 4px 0 color-mix(in srgb, var(--sea) 60%, #000);
+  }
+  .next:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--sea) 60%, #000); }
+
+  /* Stamp strip */
+  .stamps-title { font-family: "Jua", sans-serif; font-size: 1.15rem; margin: 1.6rem 0 .6rem; }
+  .stamps { display: grid; grid-template-columns: repeat(5, 1fr); gap: .6rem; }
+  .stamps.many { grid-template-columns: repeat(6, 1fr); gap: .45rem; }
+  .stamps.many .stamp.got .flag, .stamps.many .flag { font-size: 1.5rem; }
+  .modes { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
+  .next.alt { background: var(--grass); box-shadow: 0 4px 0 color-mix(in srgb, var(--grass) 60%, #000); }
+  .stamp {
+    aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--line);
+    display: grid; place-items: center; color: var(--line); font-size: 1.4rem;
+  }
+  .stamp.got {
+    border: 3px double var(--coral); color: var(--coral); transform: rotate(-12deg);
+    background: color-mix(in srgb, var(--coral) 8%, transparent);
+    animation: thump .4s ease-out;
+  }
+  .stamp.got .flag { font-size: 1.9rem; }
+  .stamp.missed { border-style: solid; border-color: var(--line); opacity: .6; }
+  @keyframes thump { 0%{transform:scale(1.8) rotate(-12deg);opacity:0} 100%{transform:scale(1) rotate(-12deg);opacity:1} }
+
+  .end { text-align: center; }
+  .end .score { font-family: "Jua", sans-serif; font-size: clamp(3rem, 14vw, 5rem); color: var(--sea); margin: .2rem 0; line-height: 1; }
+  .end p { margin: .4rem 0 1.2rem; }
+
+  /* Photo manager */
+  details { margin-top: 2rem; background: var(--card); border-radius: 18px; border: 2px solid var(--line); padding: .8rem 1rem; }
+  summary { font-family: "Jua", sans-serif; font-size: 1.1rem; cursor: pointer; }
+  .mgr-note { color: var(--muted); font-size: .95rem; margin: .5rem 0 1rem; }
+  .mgr { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem; }
+  .mgr-item { text-align: center; font-size: .95rem; }
+  .mgr-item .photo { width: 100%; height: 110px; margin-bottom: .35rem; }
+  .mgr-item .photo .emo { font-size: 2.6rem; }
+  .mgr-btns { display: flex; gap: .3rem; justify-content: center; flex-wrap: wrap; }
+  .mgr-btns label, .mgr-btns button {
+    font-size: .85rem; border: 2px solid var(--sea); color: var(--sea); background: transparent;
+    border-radius: 999px; padding: .15rem .6rem; cursor: pointer;
+  }
+  .mgr-btns input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+  @media (max-width: 480px) {
+    .who { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .photo { width: 120px; height: 140px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>세계 친구 여권</h1>
+    <div class="progress" id="progress" aria-live="polite"></div>
+  </header>
+
+  <main id="game"></main>
+
+  <details>
+    <summary>인물 사진 넣기 (선생님·부모님용)</summary>
+    <p class="mgr-note">사진을 넣으면 그림 대신 사진이 나와요. 사진은 이 기기의 브라우저에만 저장돼요.</p>
+    <div class="mgr" id="mgr"></div>
+  </details>
+</div>
+
+<script>
+const PEOPLE = [
+  { id:"kr", country:"대한민국", flag:"🇰🇷", name:"손흥민", job:"축구 선수", emo:"⚽", fact:"토트넘에서 오래 뛰며 아시아 선수 최초로 프리미어리그 득점왕에 올랐어요." },
+  { id:"us", country:"미국", flag:"🇺🇸", name:"토머스 에디슨", job:"발명가", emo:"💡", fact:"전구를 오래 켜지게 만들고 축음기도 발명했어요." },
+  { id:"gb", country:"영국", flag:"🇬🇧", name:"아이작 뉴턴", job:"과학자", emo:"🍎", fact:"떨어지는 사과를 보고 만유인력을 떠올렸다는 이야기로 유명해요." },
+  { id:"fr", country:"프랑스", flag:"🇫🇷", name:"나폴레옹", job:"황제", emo:"👑", fact:"프랑스의 황제가 되어 유럽의 많은 나라를 다스렸어요." },
+  { id:"de", country:"독일", flag:"🇩🇪", name:"베토벤", job:"작곡가", emo:"🎹", fact:"귀가 잘 들리지 않게 된 뒤에도 '합창 교향곡' 같은 명곡을 썼어요." },
+  { id:"it", country:"이탈리아", flag:"🇮🇹", name:"레오나르도 다빈치", job:"화가·발명가", emo:"🎨", fact:"'모나리자'를 그렸고, 하늘을 나는 기계도 설계했어요." },
+  { id:"jp", country:"일본", flag:"🇯🇵", name:"오타니 쇼헤이", job:"야구 선수", emo:"⚾", fact:"공도 던지고 홈런도 치는 '투타 겸업' 선수예요." },
+  { id:"cn", country:"중국", flag:"🇨🇳", name:"공자", job:"사상가", emo:"📜", fact:"예의와 배움을 중요하게 가르친 옛날 선생님이에요." },
+  { id:"in", country:"인도", flag:"🇮🇳", name:"마하트마 간디", job:"독립운동가", emo:"🕊️", fact:"폭력 없이 평화로운 방법으로 인도의 독립을 이끌었어요." },
+  { id:"ar", country:"아르헨티나", flag:"🇦🇷", name:"리오넬 메시", job:"축구 선수", emo:"⚽", fact:"2022년 월드컵에서 아르헨티나를 우승으로 이끌었어요." },
+  { id:"es", country:"스페인", flag:"🇪🇸", name:"파블로 피카소", job:"화가", emo:"🖌️", fact:"사물을 여러 방향에서 본 모습을 한 그림에 담는 '입체파' 그림을 그렸어요." },
+  { id:"nl", country:"네덜란드", flag:"🇳🇱", name:"빈센트 반 고흐", job:"화가", emo:"🌻", fact:"노란 '해바라기'와 '별이 빛나는 밤'을 그렸어요." },
+  { id:"at", country:"오스트리아", flag:"🇦🇹", name:"모차르트", job:"작곡가", emo:"🎻", fact:"다섯 살 무렵부터 곡을 만든 음악 신동이에요." },
+  { id:"pl", country:"폴란드", flag:"🇵🇱", name:"마리 퀴리", job:"과학자", emo:"🔬", fact:"여성 최초로 노벨상을 받았고, 노벨상을 두 번이나 받았어요." },
+  { id:"ru", country:"러시아", flag:"🇷🇺", name:"차이콥스키", job:"작곡가", emo:"🩰", fact:"발레 음악 '백조의 호수'와 '호두까기 인형'을 만들었어요." },
+  { id:"se", country:"스웨덴", flag:"🇸🇪", name:"알프레드 노벨", job:"발명가", emo:"🏅", fact:"다이너마이트를 발명했고, 남긴 재산으로 노벨상이 만들어졌어요." },
+  { id:"dk", country:"덴마크", flag:"🇩🇰", name:"안데르센", job:"동화 작가", emo:"📖", fact:"'미운 오리 새끼'와 '인어 공주'를 썼어요." },
+  { id:"gr", country:"그리스", flag:"🇬🇷", name:"아리스토텔레스", job:"철학자", emo:"🏛️", fact:"동물, 식물, 별까지 세상의 모든 것을 궁금해하며 공부한 옛날 학자예요." },
+  { id:"eg", country:"이집트", flag:"🇪🇬", name:"클레오파트라", job:"여왕", emo:"👸", fact:"고대 이집트의 마지막 여왕이에요." },
+  { id:"za", country:"남아프리카공화국", flag:"🇿🇦", name:"넬슨 만델라", job:"대통령", emo:"✊", fact:"피부색으로 차별하는 제도에 맞서 싸웠고, 남아공의 첫 흑인 대통령이 되었어요." },
+  { id:"br", country:"브라질", flag:"🇧🇷", name:"펠레", job:"축구 선수", emo:"🥅", fact:"월드컵에서 세 번 우승한 유일한 선수예요." },
+  { id:"mx", country:"멕시코", flag:"🇲🇽", name:"프리다 칼로", job:"화가", emo:"🌺", fact:"몸이 아픈 중에도 자기 모습을 담은 알록달록한 그림을 많이 그렸어요." },
+  { id:"pt", country:"포르투갈", flag:"🇵🇹", name:"바스쿠 다가마", job:"탐험가", emo:"⛵", fact:"배를 타고 아프리카를 돌아 유럽에서 인도로 가는 바닷길을 처음 열었어요." },
+  { id:"mn", country:"몽골", flag:"🇲🇳", name:"칭기즈 칸", job:"황제", emo:"🐎", fact:"말을 탄 군대로 아주 넓은 몽골 제국을 세웠어요." },
+  { id:"jm", country:"자메이카", flag:"🇯🇲", name:"우사인 볼트", job:"육상 선수", emo:"⚡", fact:"100m를 9초 58에 달린, 세계에서 가장 빠른 사람이에요." },
+  { id:"nz", country:"뉴질랜드", flag:"🇳🇿", name:"에드먼드 힐러리", job:"산악인", emo:"🏔️", fact:"텐징 노르가이와 함께 에베레스트산 꼭대기에 처음 올랐어요." },
+  { id:"no", country:"노르웨이", flag:"🇳🇴", name:"로알 아문센", job:"탐험가", emo:"🧭", fact:"세계 최초로 남극점에 도착했어요." },
+  { id:"ph", country:"필리핀", flag:"🇵🇭", name:"매니 파키아오", job:"권투 선수", emo:"🥊", fact:"여덟 개 체급에서 세계 챔피언이 되었어요." },
+  { id:"ch", country:"스위스", flag:"🇨🇭", name:"로저 페더러", job:"테니스 선수", emo:"🎾", fact:"테니스 4대 메이저 대회에서 20번 우승했어요." },
+  { id:"ca", country:"캐나다", flag:"🇨🇦", name:"제임스 네이스미스", job:"체육 선생님", emo:"🏀", fact:"복숭아 바구니를 골대 삼아 농구를 처음 만들었어요." },
+];
+
+const PHOTO_KEY = "worldFriends.photos";
+let photos = {};
+try { photos = JSON.parse(localStorage.getItem(PHOTO_KEY) || "{}") || {}; } catch (e) { photos = {}; }
+function savePhotos() {
+  try { localStorage.setItem(PHOTO_KEY, JSON.stringify(photos)); return true; }
+  catch (e) { alert("사진 저장 공간이 가득 찼어요. 더 작은 사진을 넣어 주세요."); return false; }
+}
+
+const shuffle = a => { const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; };
+const $ = s => document.querySelector(s);
+
+let order = [], idx = 0, score = 0, results = [];
+
+function photoHTML(p) {
+  return photos[p.id]
+    ? `<img src="${photos[p.id]}" alt="${p.name} 사진">`
+    : `<span class="emo flag" aria-hidden="true">${p.emo}</span>`;
+}
+
+function stampsHTML() {
+  return `<div class="stamps-title">내 여권 도장</div>
+    <div class="stamps${order.length > 10 ? ' many' : ''}">${order.map((p,i) => {
+      const r = results[i];
+      if (r === true) return `<div class="stamp got" title="${p.country}"><span class="flag">${p.flag}</span></div>`;
+      if (r === false) return `<div class="stamp missed" title="${p.country}"><span class="flag" style="filter:grayscale(1)">${p.flag}</span></div>`;
+      return `<div class="stamp">?</div>`;
+    }).join("")}</div>`;
+}
+
+function start(n) {
+  order = shuffle(PEOPLE).slice(0, n); idx = 0; score = 0; results = [];
+  renderQ();
+}
+
+function modeButtons() {
+  return `<div class="modes">
+      <button class="next" data-n="10">10문제 도전</button>
+      <button class="next alt" data-n="${PEOPLE.length}">${PEOPLE.length}개 나라 모두 도전</button>
+    </div>`;
+}
+function bindModes() {
+  document.querySelectorAll("[data-n]").forEach(b => b.addEventListener("click", () => start(+b.dataset.n)));
+}
+
+function renderStart() {
+  $("#progress").textContent = `${PEOPLE.length}개 나라`;
+  $("#game").innerHTML = `
+    <section class="passport end">
+      <h2 style="margin:0 0 .4rem;font-size:1.7rem">세계 친구들의 나라를 맞혀 봐요</h2>
+      <p>정답을 맞히면 여권에 그 나라 도장이 찍혀요.</p>
+      ${modeButtons()}
+    </section>`;
+  bindModes();
+}
+
+function renderQ() {
+  tries = 0;
+  const p = order[idx];
+  const others = shuffle(PEOPLE.filter(x => x.id !== p.id)).slice(0, 3);
+  const opts = shuffle([p, ...others]);
+  $("#progress").textContent = `${idx + 1} / ${order.length}`;
+  $("#game").innerHTML = `
+    <section class="passport">
+      <div class="who">
+        <div class="photo">${photoHTML(p)}</div>
+        <div>
+          <h2>${p.name}</h2>
+          <p class="job">${p.job}</p>
+        </div>
+      </div>
+      <p class="ask">이 사람은 어느 나라 사람일까요? <span style="font-size:.95rem;color:var(--muted)">(기회 2번)</span></p>
+      <div class="choices">
+        ${opts.map(o => `<button class="choice" data-id="${o.id}">
+            <span class="flag" aria-hidden="true">${o.flag}</span>
+            <span class="name">${o.country}</span></button>`).join("")}
+      </div>
+      <div class="feedback" id="fb" aria-live="polite"></div>
+    </section>
+    ${stampsHTML()}`;
+  document.querySelectorAll(".choice").forEach(b => b.addEventListener("click", () => answer(b, p)));
+}
+
+let tries = 0;
+function answer(btn, p) {
+  const ok = btn.dataset.id === p.id;
+  tries++;
+  if (!ok && tries < 2) {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    $("#fb").innerHTML = `<p class="big">앗, 아니에요! 한 번 더 골라 봐요 💪</p>
+      <p class="fact">힌트: ${p.job}인 ${p.name}의 나라를 떠올려 봐요.</p>`;
+    return;
+  }
+  document.querySelectorAll(".choice").forEach(b => {
+    b.disabled = true;
+    if (b.dataset.id === p.id) b.classList.add("right");
+  });
+  if (!ok) btn.classList.add("wrong");
+  if (ok) score++;
+  results[idx] = ok;
+  const last = idx === order.length - 1;
+  const title = ok ? (tries === 1 ? "딩동댕! 정답이에요 🎉" : "두 번 만에 성공! 잘했어요 👏")
+                   : `아쉬워요! 정답은 ${p.country}`;
+  $("#fb").innerHTML = `
+    <p class="big">${title}</p>
+    <p class="fact">${p.fact}</p>
+    <button class="next" id="nextBtn">${last ? "결과 보기" : "다음 문제"}</button>`;
+  document.querySelector(".stamps").outerHTML = stampsHTML().split('<div class="stamps-title">내 여권 도장</div>')[1];
+  const nb = $("#nextBtn"); nb.focus();
+  nb.addEventListener("click", () => { if (last) renderEnd(); else { idx++; renderQ(); } });
+}
+
+function renderEnd() {
+  const r = score / order.length;
+  const msg = r === 1 ? "세계 여행 박사! 모든 도장을 모았어요!"
+    : r >= 0.7 ? "대단해요! 거의 다 모았어요."
+    : r >= 0.4 ? "좋아요! 한 번 더 하면 더 많이 모을 수 있어요."
+    : "괜찮아요! 다시 도전하면서 친구들을 알아가요.";
+  $("#progress").textContent = "끝!";
+  $("#game").innerHTML = `
+    <section class="passport end">
+      <h2 style="margin:0;font-size:1.6rem">모은 도장</h2>
+      <div class="score">${score} / ${order.length}</div>
+      <p>${msg}</p>
+      ${modeButtons()}
+    </section>
+    ${stampsHTML()}`;
+  bindModes();
+  document.querySelector("[data-n]").focus();
+}
+
+/* Photo manager */
+function renderMgr() {
+  $("#mgr").innerHTML = PEOPLE.map(p => `
+    <div class="mgr-item">
+      <div class="photo">${photoHTML(p)}</div>
+      <div>${p.flag ? `<span class="flag">${p.flag}</span> ` : ""}${p.name}</div>
+      <div class="mgr-btns">
+        <label>사진 고르기<input type="file" accept="image/*" data-id="${p.id}"></label>
+        ${photos[p.id] ? `<button data-del="${p.id}">지우기</button>` : ""}
+      </div>
+    </div>`).join("");
+  document.querySelectorAll('#mgr input[type=file]').forEach(inp => inp.addEventListener("change", onPick));
+  document.querySelectorAll('#mgr [data-del]').forEach(b => b.addEventListener("click", () => {
+    delete photos[b.dataset.del]; savePhotos(); renderMgr(); refreshCurrent();
+  }));
+}
+
+function onPick(e) {
+  const file = e.target.files[0]; const id = e.target.dataset.id;
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const W = 240, H = 280, c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      const s = Math.max(W / img.width, H / img.height);
+      const w = img.width * s, h = img.height * s;
+      c.getContext("2d").drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      const prev = photos[id];
+      photos[id] = c.toDataURL("image/jpeg", 0.8);
+      if (!savePhotos()) { if (prev) photos[id] = prev; else delete photos[id]; }
+      renderMgr(); refreshCurrent();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function refreshCurrent() {
+  const ph = document.querySelector(".passport .who .photo");
+  if (ph && order[idx]) ph.innerHTML = photoHTML(order[idx]);
+}
+
+renderMgr();
+renderStart();
+</script>
+</body>
+</html>
